@@ -9,6 +9,7 @@ import Connect from './components/Connect';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import DashboardWidget from './components/DashboardWidget';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -51,6 +52,7 @@ function App() {
         <>
           <Hero navigateTo={navigateTo} />
           <Services />
+          <DashboardWidget />
           <Stats />
           <Founder />
           <Testimonials />
