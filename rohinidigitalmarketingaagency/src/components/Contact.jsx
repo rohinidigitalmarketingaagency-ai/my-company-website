@@ -10,6 +10,32 @@ export default function Contact() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Connect to your live backend
+      const response = await fetch('http://localhost:5000/api/submit-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData) // Sends name, email, website, and budget!
+      });
+
+      if (response.ok) {
+        // This triggers your awesome animated success screen!
+        setIsSubmitted(true); 
+        setFormData({ name: '', email: '', website: '', budget: 'under-5k' });
+      } else {
+        alert('❌ Server received the request, but rejected the data.');
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
+      alert('❌ Could not reach the backend. Is your Node.js terminal running?');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitted(true);

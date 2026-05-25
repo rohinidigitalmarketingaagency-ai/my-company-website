@@ -11,16 +11,36 @@ export default function Connect({ navigateTo }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  // 🚨 THE REAL DATABASE CONNECTION 🚨
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API submission
-    setTimeout(() => {
+    try {
+      // Connect to your live Node.js backend
+      const response = await fetch('https://rohini-backend-1.onrender.com/api/submit-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Sends your name, email, phone, and message state directly to the database
+        body: JSON.stringify(formData) 
+      });
+
+      if (response.ok) {
+        // Success! Stop loading, show the success screen, and clear the form
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        setIsSubmitting(false);
+        alert('❌ Server received the request, but rejected the data.');
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    }, 1500);
+      alert('❌ Could not reach the backend. Is your Node.js terminal running?');
+    }
   };
 
   return (
