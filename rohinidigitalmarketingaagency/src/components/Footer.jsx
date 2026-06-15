@@ -27,25 +27,13 @@ export default function Footer({ navigateTo }) {
             <a 
               href="#" 
               onClick={(e) => { e.preventDefault(); navigateTo('home'); }} 
-              className="flex items-center gap-3 group"
+              className="flex items-center group"
             >
-              {/* Cropped Lotus Graphic Icon */}
-              <div className="w-16 h-12 overflow-hidden flex-shrink-0">
-                <img 
-                  src={logo} 
-                  alt="Rohini Lotus Icon" 
-                  className="h-full w-auto max-w-none object-cover object-left mix-blend-multiply contrast-[1.1] brightness-[1.02]" 
-                />
-              </div>
-              {/* Native HTML Text Company Name */}
-              <div className="flex flex-col text-left">
-                <span className="font-extrabold text-lg text-slate-900 tracking-tight leading-none group-hover:text-primaryAccent transition-colors">
-                  ROHINI
-                </span>
-                <span className="text-[10px] font-bold text-primaryAccent tracking-wider uppercase mt-0.5 group-hover:text-secondaryAccent transition-colors">
-                  Digital Marketing Aagency
-                </span>
-              </div>
+              <img
+                src={logo}
+                alt="Rohini Digital Marketing Aagency"
+                className="h-14 w-auto object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]"
+              />
             </a>
             <p className="text-textSecondary text-sm max-w-sm leading-relaxed">
               We design, build, and optimize hyper-growth digital acquisition funnels. Helping brands dominate their industries through high-conversion SEO, PPC advertising, and custom sales funnels.

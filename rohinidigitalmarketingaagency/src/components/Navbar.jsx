@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, X, ArrowRight, Zap } from 'lucide-react';
 import logo from './logo.png';
 
 export default function Navbar({ navigateTo, currentPage }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -26,66 +25,94 @@ export default function Navbar({ navigateTo, currentPage }) {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${scrolled
-        ? 'bg-slate-100/95 backdrop-blur-md py-3 shadow-md shadow-slate-200/20 border-slate-200/80'
-        : 'bg-slate-50/90 backdrop-blur-md py-4 border-slate-200/40 shadow-sm shadow-slate-200/10'
-      }`}>
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+        mounted ? 'nav-slide-down' : 'opacity-0 -translate-y-full'
+      } ${
+        scrolled
+          ? 'nav-scrolled py-2'
+          : 'nav-top py-3'
+      }`}
+    >
+      {/* Animated gradient accent line at top */}
+      <div className="nav-accent-bar" />
+
+      {/* Subtle animated shimmer overlay */}
+      <div className="nav-shimmer-overlay pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center relative z-10">
+
+        {/* Logo */}
         <a
           href="#"
           onClick={(e) => { e.preventDefault(); navigateTo('home'); }}
-          className="flex items-center gap-3 group"
+          className="flex items-center group logo-hover-glow"
         >
-          {/* Cropped Lotus Graphic Icon */}
-          <div className="w-14 h-10 md:w-16 md:h-12 overflow-hidden flex-shrink-0">
-            <img
-              src={logo}
-              alt="Rohini Lotus Icon"
-              className="h-full w-auto max-w-none object-cover object-left mix-blend-multiply contrast-[1.1] brightness-[1.02]"
-            />
-          </div>
-          {/* Native HTML Text Company Name */}
-          <div className="flex flex-col text-left">
-            <span className="font-extrabold text-base md:text-lg text-slate-900 tracking-tight leading-none group-hover:text-primaryAccent transition-colors">
-              ROHINI
-            </span>
-            <span className="text-[9px] md:text-[10px] font-bold text-primaryAccent tracking-wider uppercase mt-0.5 group-hover:text-secondaryAccent transition-colors">
-              Digital Marketing Aagency
-            </span>
-          </div>
+          <img
+            src={logo}
+            alt="Rohini Digital Marketing Aagency"
+            className="h-12 md:h-14 w-auto object-contain mix-blend-multiply transition-all duration-500 group-hover:scale-[1.06] group-hover:drop-shadow-md"
+          />
         </a>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
+        <div className="hidden md:flex items-center space-x-1">
+          {navLinks.map((link, i) => (
             <a
               key={link.name}
               href={`#${link.anchor}`}
               onClick={(e) => {
                 e.preventDefault();
+                setActiveLink(link.anchor);
                 navigateTo('home', link.anchor);
               }}
-              className="text-textSecondary hover:text-primaryAccent transition-colors duration-200 font-medium text-sm"
+              className={`nav-link-item group px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
+                activeLink === link.anchor
+                  ? 'text-primaryAccent'
+                  : 'text-textSecondary hover:text-primaryAccent'
+              }`}
+              style={{ animationDelay: `${i * 80}ms` }}
             >
-              {link.name}
+              {/* Hover background pill */}
+              <span className="nav-link-bg absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              <span className="relative z-10">{link.name}</span>
+              {/* Animated underline */}
+              <span
+                className={`absolute bottom-0.5 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-primaryAccent to-secondaryAccent transform transition-all duration-300 ${
+                  activeLink === link.anchor
+                    ? 'scale-x-100 opacity-100'
+                    : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100'
+                }`}
+              />
             </a>
           ))}
         </div>
 
         {/* CTA Button */}
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-3">
+          {/* Live badge */}
+          <span className="live-badge hidden lg:flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
+            <span className="live-dot w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Accepting Clients
+          </span>
+
+          {/* Glowing CTA button */}
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
               navigateTo('connect');
             }}
-            className="relative inline-flex items-center justify-center p-0.5 me-2 overflow-hidden text-sm font-semibold rounded-full group bg-gradient-to-br from-primaryAccent to-secondaryAccent text-white focus:ring-4 focus:outline-none focus:ring-purple-300"
+            className="cta-button group relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full text-white overflow-hidden"
           >
-            <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white text-textPrimary rounded-full group-hover:bg-opacity-0 group-hover:text-white">
-              <span className="flex items-center gap-2">
-                Grow My Business <ArrowRight className="w-4 h-4" />
-              </span>
+            {/* Animated gradient background */}
+            <span className="cta-bg absolute inset-0 rounded-full" />
+            {/* Pulse ring */}
+            <span className="cta-pulse-ring absolute inset-0 rounded-full" />
+            <span className="relative z-10 flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              Grow My Business
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
             </span>
           </a>
         </div>
@@ -94,18 +121,25 @@ export default function Navbar({ navigateTo, currentPage }) {
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-textSecondary hover:text-textPrimary transition-colors p-2"
+            className={`mobile-menu-btn p-2 rounded-xl transition-all duration-300 ${
+              isOpen ? 'rotate-90 text-primaryAccent bg-primaryAccent/10' : 'text-textSecondary hover:text-primaryAccent hover:bg-primaryAccent/5'
+            }`}
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden absolute w-full left-0 glass-nav transition-all duration-300 ease-in-out border-b border-black/5 ${isOpen ? 'top-full opacity-100 visible py-6' : '-top-[400px] opacity-0 invisible py-0'
-        }`}>
-        <div className="flex flex-col items-center space-y-6 px-6">
-          {navLinks.map((link) => (
+      <div
+        className={`md:hidden absolute w-full left-0 mobile-menu-panel transition-all duration-400 ease-out ${
+          isOpen ? 'top-full opacity-100 visible mobile-menu-open' : '-top-2 opacity-0 invisible'
+        }`}
+      >
+        {/* Animated background gradient */}
+        <div className="mobile-menu-bg" />
+        <div className="relative z-10 flex flex-col px-6 py-5 space-y-1">
+          {navLinks.map((link, i) => (
             <a
               key={link.name}
               href={`#${link.anchor}`}
@@ -114,22 +148,31 @@ export default function Navbar({ navigateTo, currentPage }) {
                 setIsOpen(false);
                 navigateTo('home', link.anchor);
               }}
-              className="text-textSecondary hover:text-primaryAccent transition-colors duration-200 font-medium text-lg w-full text-center py-2"
+              className="mobile-nav-link group flex items-center justify-between px-4 py-3 rounded-xl font-medium text-base text-textSecondary hover:text-primaryAccent transition-all duration-200"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              {link.name}
+              <span>{link.name}</span>
+              <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primaryAccent" />
             </a>
           ))}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setIsOpen(false);
-              navigateTo('connect');
-            }}
-            className="w-full text-center py-3 bg-gradient-to-r from-primaryAccent to-secondaryAccent text-white font-bold rounded-xl shadow-lg shadow-primaryAccent/20 hover:scale-[1.02] transition-transform duration-200"
-          >
-            Grow My Business
-          </a>
+
+          <div className="pt-3 border-t border-black/5">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsOpen(false);
+                navigateTo('connect');
+              }}
+              className="cta-button-mobile flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-white text-sm relative overflow-hidden"
+            >
+              <span className="cta-bg absolute inset-0 rounded-xl" />
+              <span className="relative z-10 flex items-center gap-2">
+                <Zap className="w-4 h-4 fill-current" />
+                Grow My Business
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </nav>
