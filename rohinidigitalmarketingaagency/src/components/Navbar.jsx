@@ -1,177 +1,157 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ArrowRight, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, ArrowRight } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import logo from './logo.png';
+
+const navLinks = [
+  { name: 'Services',     page: 'services' },
+  { name: 'About',        page: 'about' },
+  { name: 'Testimonials', page: 'testimonials' },
+  { name: 'Founder',      page: 'founder' },
+  { name: 'Contact',      page: 'contact' },
+];
 
 export default function Navbar({ navigateTo, currentPage }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeLink, setActiveLink] = useState('');
   const [mounted, setMounted] = useState(false);
+  const location = useLocation();  // real URL path
+
+  // Active detection: match nav link paths against current URL
+  const isActive = (page) => {
+    const pathMap = { services: '/services', about: '/about', testimonials: '/testimonials', founder: '/founder', contact: '/contact' };
+    return location.pathname === pathMap[page] ||
+           (page === 'services' && location.pathname.startsWith('/services'));
+  };
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Services', anchor: 'services' },
-    { name: 'About', anchor: 'about' },
-    { name: 'Testimonials', anchor: 'testimonials' },
-    { name: 'Contact', anchor: 'about-founder' },
-  ];
+  const go = (page) => {
+    navigateTo(page);
+    setIsOpen(false);
+  };
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        mounted ? 'nav-slide-down' : 'opacity-0 -translate-y-full'
-      } ${
-        scrolled
-          ? 'nav-scrolled py-2'
-          : 'nav-top py-3'
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${mounted ? 'nav-slide-down' : 'opacity-0 -translate-y-full'} ${
+        scrolled ? 'shadow-2xl' : 'shadow-lg'
       }`}
+      style={{
+        background: scrolled
+          ? 'rgba(15, 37, 87, 0.98)'
+          : 'rgba(15, 37, 87, 0.95)',
+        backdropFilter: 'blur(20px)',
+      }}
     >
-      {/* Animated gradient accent line at top */}
+      {/* Animated blue bottom accent bar */}
       <div className="nav-accent-bar" />
 
-      {/* Subtle animated shimmer overlay */}
-      <div className="nav-shimmer-overlay pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between py-3">
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center relative z-10">
-
-        {/* Logo */}
+        {/* Logo — gold on dark navbar with a subtle warm container */}
         <a
           href="#"
-          onClick={(e) => { e.preventDefault(); navigateTo('home'); }}
-          className="flex items-center group logo-hover-glow"
+          onClick={(e) => { e.preventDefault(); go('home'); }}
+          className="flex items-center group flex-shrink-0"
         >
-          <img
-            src={logo}
-            alt="Rohini Digital Marketing Aagency"
-            className="h-12 md:h-14 w-auto object-contain mix-blend-multiply transition-all duration-500 group-hover:scale-[1.06] group-hover:drop-shadow-md"
-          />
+          <div
+            className="rounded-xl overflow-hidden transition-all duration-300 group-hover:opacity-90 group-hover:scale-[1.03]"
+            style={{ padding: '3px 8px', background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.12)' }}
+          >
+            <img
+              src={logo}
+              alt="Rohini Digital Marketing Agency"
+              className="h-10 md:h-11 w-auto object-contain block"
+            />
+          </div>
         </a>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center space-x-1">
-          {navLinks.map((link, i) => (
-            <a
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-0.5">
+          {navLinks.map((link) => (
+            <button
               key={link.name}
-              href={`#${link.anchor}`}
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveLink(link.anchor);
-                navigateTo('home', link.anchor);
-              }}
-              className={`nav-link-item group px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
-                activeLink === link.anchor
-                  ? 'text-primaryAccent'
-                  : 'text-textSecondary hover:text-primaryAccent'
+              onClick={() => go(link.page)}
+              className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 group ${
+                isActive(link.page)
+                  ? 'text-white bg-white/10'
+                  : 'text-blue-100/80 hover:text-white hover:bg-white/8'
               }`}
-              style={{ animationDelay: `${i * 80}ms` }}
             >
-              {/* Hover background pill */}
-              <span className="nav-link-bg absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              <span className="relative z-10">{link.name}</span>
-              {/* Animated underline */}
+              {link.name}
+              {/* Active underline */}
               <span
-                className={`absolute bottom-0.5 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-primaryAccent to-secondaryAccent transform transition-all duration-300 ${
-                  activeLink === link.anchor
-                    ? 'scale-x-100 opacity-100'
-                    : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100'
+                className={`absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-accent transition-transform duration-300 ${
+                  isActive(link.page) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                 }`}
               />
-            </a>
+            </button>
           ))}
         </div>
 
-        {/* CTA Button */}
+        {/* Right side: badge + CTA */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Live badge */}
-          <span className="live-badge hidden lg:flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
-            <span className="live-dot w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300 border border-emerald-500/25 bg-emerald-900/20 px-3 py-1.5 rounded-full">
+            <span className="live-dot w-1.5 h-1.5 rounded-full bg-emerald-400" />
             Accepting Clients
           </span>
-
-          {/* Glowing CTA button */}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigateTo('connect');
+          <button
+            onClick={() => go('contact')}
+            className="btn-shine relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-bold text-sm transition-all duration-300 hover:-translate-y-0.5"
+            style={{
+              background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+              boxShadow: '0 4px 18px rgba(14,165,233,0.35)',
             }}
-            className="cta-button group relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full text-white overflow-hidden"
+            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 6px 28px rgba(14,165,233,0.55)')}
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 4px 18px rgba(14,165,233,0.35)')}
           >
-            {/* Animated gradient background */}
-            <span className="cta-bg absolute inset-0 rounded-full" />
-            {/* Pulse ring */}
             <span className="cta-pulse-ring absolute inset-0 rounded-full" />
             <span className="relative z-10 flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              Grow My Business
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+              Contact us
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-200" />
             </span>
-          </a>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`mobile-menu-btn p-2 rounded-xl transition-all duration-300 ${
-              isOpen ? 'rotate-90 text-primaryAccent bg-primaryAccent/10' : 'text-textSecondary hover:text-primaryAccent hover:bg-primaryAccent/5'
-            }`}
-          >
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
+
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`md:hidden p-2 rounded-xl transition-all duration-300 text-blue-100 hover:text-white hover:bg-white/10 ${isOpen ? 'rotate-90 text-white' : ''}`}
+        >
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Drawer */}
       <div
-        className={`md:hidden absolute w-full left-0 mobile-menu-panel transition-all duration-400 ease-out ${
-          isOpen ? 'top-full opacity-100 visible mobile-menu-open' : '-top-2 opacity-0 invisible'
+        className={`md:hidden absolute w-full left-0 border-t border-white/10 transition-all duration-350 ease-out ${
+          isOpen ? 'top-full opacity-100 visible' : 'top-[95%] opacity-0 invisible pointer-events-none'
         }`}
+        style={{ background: 'rgba(13, 26, 53, 0.98)', backdropFilter: 'blur(20px)' }}
       >
-        {/* Animated background gradient */}
-        <div className="mobile-menu-bg" />
-        <div className="relative z-10 flex flex-col px-6 py-5 space-y-1">
-          {navLinks.map((link, i) => (
-            <a
+        <div className="flex flex-col px-6 py-5 gap-1">
+          {navLinks.map((link) => (
+            <button
               key={link.name}
-              href={`#${link.anchor}`}
-              onClick={(e) => {
-                e.preventDefault();
-                setIsOpen(false);
-                navigateTo('home', link.anchor);
-              }}
-              className="mobile-nav-link group flex items-center justify-between px-4 py-3 rounded-xl font-medium text-base text-textSecondary hover:text-primaryAccent transition-all duration-200"
-              style={{ animationDelay: `${i * 60}ms` }}
+              onClick={() => go(link.page)}
+              className="text-left px-4 py-3 rounded-xl text-blue-100 hover:text-white hover:bg-white/10 font-semibold text-base transition-all duration-200"
             >
-              <span>{link.name}</span>
-              <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-primaryAccent" />
-            </a>
+              {link.name}
+            </button>
           ))}
-
-          <div className="pt-3 border-t border-black/5">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsOpen(false);
-                navigateTo('connect');
-              }}
-              className="cta-button-mobile flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-white text-sm relative overflow-hidden"
+          <div className="pt-3 mt-1 border-t border-white/10">
+            <button
+              onClick={() => go('contact')}
+              className="w-full py-3.5 rounded-xl text-white font-bold text-sm"
+              style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' }}
             >
-              <span className="cta-bg absolute inset-0 rounded-xl" />
-              <span className="relative z-10 flex items-center gap-2">
-                <Zap className="w-4 h-4 fill-current" />
-                Grow My Business
-              </span>
-            </a>
+              Conntact us
+            </button>
           </div>
         </div>
       </div>
