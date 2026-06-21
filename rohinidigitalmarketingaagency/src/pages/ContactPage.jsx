@@ -2,14 +2,36 @@ import React, { useState } from 'react';
 import { Send, Phone, Mail, MapPin, CheckCircle } from 'lucide-react';
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
+const handleSubmit = async (e) => {
+    e.preventDefault(); // 1. Stop the page refresh
+
+    try {
+      // 2. Send the 'form' state to your Node.js backend
+      const response = await fetch('http://localhost:5000/api/submit-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form), // Your state is named 'form'
+      });
+
+      // 3. If the backend says "Success (201)", show the beautiful success UI
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        alert("Backend received it, but there was an error saving to the database.");
+      }
+      
+    } catch (error) {
+      // 4. If the backend is turned off or unreachable
+      console.error("Connection failed:", error);
+      alert("Could not connect to the backend. Is your Node server running?");
+    }
   };
 
   return (
@@ -105,16 +127,7 @@ export default function ContactPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-textMuted uppercase tracking-wider mb-1.5">Service Interested In</label>
-                  <select name="service" value={form.service} onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl text-sm text-textPrimary border border-borderClr bg-sectionAlt focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all appearance-none">
-                    <option value="">Select a service</option>
-                    {['Technical SEO', 'Pay-Per-Click Advertising', 'Filming and editing', 'Content Strategy', 'Social Media Growth', 'Full-Service Package'].map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
+
 
                 <div>
                   <label className="block text-xs font-bold text-textMuted uppercase tracking-wider mb-1.5">Tell Us About Your Goals</label>
