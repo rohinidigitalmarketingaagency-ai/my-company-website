@@ -12,7 +12,7 @@ const handleSubmit = async (e) => {
 
     try {
       // 2. Send the 'form' state to your Node.js backend
-      const response = await fetch('http://localhost:5000/api/submit-form', {
+      const response = await fetch('https://rohini-backend-1.onrender.com/api/submit-form', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
